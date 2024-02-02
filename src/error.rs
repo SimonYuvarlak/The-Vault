@@ -21,6 +21,9 @@ pub enum ContractError {
     #[error("This address has not enough allowance")]
     NotEnoughAllowance { address: String },
 
+    #[error("Allowance addresses and amounts are not equal")]
+    AllowanceAddressesAmountsNotEqual {},
+
     #[error("Vault does not have enough funds")]
     NotEnoughFunds { total_amount: u128 },
 
@@ -29,4 +32,10 @@ pub enum ContractError {
 
     #[error("Address has already been added to the allowance list")]
     AllowanceExists { address: String },
+
+    #[error("Not a valid address")]
+    NotValidAddress { address: String },
+
+    #[error("Invalid coin denom. The given coin type is not supported")]
+    InvalidDenom { denom: String },
 }

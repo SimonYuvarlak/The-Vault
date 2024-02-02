@@ -4,7 +4,9 @@ use cosmwasm_std::{
 };
 
 mod contract;
+mod error;
 pub mod msg;
+mod state;
 
 #[entry_point]
 pub fn instantiate(

@@ -10,6 +10,9 @@ pub struct InstantiateMsg {
 #[cw_serde]
 pub enum ExecuteMsg {
     Deposit {},
+    AddDepositAddress {
+        address: String,
+    },
     Withdraw {
         amount: Uint128,
     },
@@ -48,6 +51,10 @@ pub enum QueryMsg {
     GetAllowance { spender: String },
     #[returns(AllowancesResponse)]
     GetAllowances {},
+    #[returns(CanDepositResponse)]
+    CanDeposit {},
+    #[returns(DepositAddressesResponse)]
+    GetDepositAddresses {},
 }
 
 #[cw_serde]
@@ -67,4 +74,14 @@ pub struct AllowanceResponse {
 pub struct AllowancesResponse {
     pub spenders: Vec<String>,
     pub amounts: Vec<Uint128>,
+}
+
+#[cw_serde]
+pub struct CanDepositResponse {
+    pub can_deposit: bool,
+}
+
+#[cw_serde]
+pub struct DepositAddressesResponse {
+    pub addresses: Vec<String>,
 }
