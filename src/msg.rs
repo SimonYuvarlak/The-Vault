@@ -1,6 +1,7 @@
 use cosmwasm_schema::cw_serde;
 use cosmwasm_schema::QueryResponses;
 use cosmwasm_std::{Coin, Uint128};
+use serde::{Deserialize, Serialize};
 
 #[cw_serde]
 pub struct InstantiateMsg {
@@ -50,7 +51,7 @@ pub enum QueryMsg {
     #[returns(AllowancesResponse)]
     GetAllowances {},
     #[returns(CanDepositResponse)]
-    CanDeposit {},
+    CanDeposit { address: String },
     #[returns(DepositAddressesResponse)]
     GetDepositAddresses {},
 }

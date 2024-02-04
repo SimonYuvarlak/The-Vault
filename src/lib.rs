@@ -51,12 +51,15 @@ pub fn execute(
     }
 }
 
-// #[entry_point]
-// pub fn query(_deps: Deps, _env: Env, msg: msg::QueryMsg) -> StdResult<Binary> {
-//     use contract::query;
-//     use msg::QueryMsg::*;
+#[entry_point]
+pub fn query(deps: Deps, _env: Env, msg: msg::QueryMsg) -> StdResult<Binary> {
+    use msg::QueryMsg::*;
 
-//     match msg {
-//         Value {} => to_json_binary(&query::value()),
-//     }
-// }
+    match msg {
+        GetState {} => to_json_binary(&contract::query::get_state(deps)?),
+        GetAllowance { spender } => to_json_binary(&contract::query::get_allowance(deps, spender)?),
+        GetAllowances {} => to_json_binary(&contract::query::get_allowances(deps)?),
+        CanDeposit { address } => to_json_binary(&contract::query::can_deposit(deps, address)?),
+        GetDepositAddresses {} => to_json_binary(&contract::query::get_deposit_addresses(deps)?),
+    }
+}

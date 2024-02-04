@@ -316,7 +316,8 @@ pub mod query {
         })
     }
 
-    pub fn can_deposit(deps: Deps, address: Addr) -> StdResult<CanDepositResponse> {
+    pub fn can_deposit(deps: Deps, address: String) -> StdResult<CanDepositResponse> {
+        let address = deps.api.addr_validate(address.as_str())?;
         let address_amount = deposit_addresses.may_load(deps.storage, address)?;
         match address_amount {
             Some(_) => Ok(CanDepositResponse { can_deposit: true }),
