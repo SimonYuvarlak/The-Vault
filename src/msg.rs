@@ -1,6 +1,6 @@
 use cosmwasm_schema::cw_serde;
 use cosmwasm_schema::QueryResponses;
-use cosmwasm_std::Uint128;
+use cosmwasm_std::{Coin, Uint128};
 
 #[cw_serde]
 pub struct InstantiateMsg {
@@ -9,13 +9,13 @@ pub struct InstantiateMsg {
 
 #[cw_serde]
 pub enum ExecuteMsg {
-    Deposit {},
+    Deposit {
+        coin: Coin,
+    },
     AddDepositAddress {
         address: String,
     },
-    Withdraw {
-        amount: Uint128,
-    },
+    Withdraw {},
     AddAllowance {
         spender: String,
         amount: Uint128,
@@ -31,9 +31,7 @@ pub enum ExecuteMsg {
         spender: String,
         amount: Uint128,
     },
-    RetirieveAllowance {
-        amount: Uint128,
-    },
+    RetrieveAllowance {},
     UpdateName {
         name: String,
     },

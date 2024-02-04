@@ -23,25 +23,15 @@ pub mod execute {
     use crate::error::ContractError;
     use crate::error::ContractError::UnauthorizedDepositAddress;
     use crate::state::{allowances, deposit_addresses, state};
-    use cosmwasm_std::{Addr, BankMsg, Coin, DepsMut, Env, MessageInfo, Response, Uint128};
+    use cosmwasm_std::{BankMsg, Coin, DepsMut, Env, MessageInfo, Response, Uint128};
 
     pub fn deposit_token(
         deps: DepsMut,
-        _env: Env,
-        _info: MessageInfo,
-        deposit_address: String,
-        amount: Uint128,
+        info: MessageInfo,
         coin: Coin,
     ) -> Result<Response, ContractError> {
         let current_state = state.load(deps.storage)?;
-        let address = match deps.api.addr_validate(deposit_address.as_str()) {
-            Ok(value) => value,
-            Err(_) => {
-                return Err(ContractError::NotValidAddress {
-                    address: deposit_address,
-                })
-            }
-        };
+        let address = info.sender;
         if coin.denom != current_state.expected_denom {
             return Err(ContractError::InvalidDenom {
                 denom: coin.denom.to_string(),
@@ -52,31 +42,30 @@ pub mod execute {
             Some(value) => {
                 deposit_addresses.save(
                     deps.storage,
-                    address,
-                    &value.checked_add(amount).unwrap_or(value),
+                    address.clone(),
+                    &value.checked_add(coin.amount).unwrap_or(value),
                 )?;
                 current_state
                     .total_amount
-                    .checked_add(amount)
+                    .checked_add(coin.amount)
                     .unwrap_or(current_state.total_amount);
 
                 state.save(deps.storage, &current_state)?;
             }
             None => {
                 return Err(UnauthorizedDepositAddress {
-                    address: deposit_address.to_string(),
+                    address: address.clone().to_string(),
                 });
             }
         }
         Ok(Response::new()
             .add_attribute("action", "deposit")
-            .add_attribute("address", deposit_address)
-            .add_attribute("amount", amount))
+            .add_attribute("address", address.to_string())
+            .add_attribute("amount", coin.amount))
     }
 
     pub fn add_deposit_address(
         deps: DepsMut,
-        _env: Env,
         info: MessageInfo,
         deposit_address: String,
     ) -> Result<Response, ContractError> {
@@ -125,7 +114,6 @@ pub mod execute {
 
     pub fn add_allowance(
         deps: DepsMut,
-        _env: Env,
         info: MessageInfo,
         spender: String,
         amount: Uint128,
@@ -149,7 +137,6 @@ pub mod execute {
 
     pub fn add_allowance_list(
         deps: DepsMut,
-        _env: Env,
         info: MessageInfo,
         spenders: Vec<String>,
         amounts: Vec<Uint128>,
@@ -184,7 +171,6 @@ pub mod execute {
 
     pub fn remove_allowance(
         deps: DepsMut,
-        _env: Env,
         info: MessageInfo,
         spender: String,
     ) -> Result<Response, ContractError> {
@@ -206,7 +192,6 @@ pub mod execute {
 
     pub fn update_allowance(
         deps: DepsMut,
-        _env: Env,
         info: MessageInfo,
         spender: String,
         amount: Uint128,
@@ -228,11 +213,7 @@ pub mod execute {
             .add_attribute("amount", amount.to_string()))
     }
 
-    pub fn retrieve_allowance(
-        deps: DepsMut,
-        _env: Env,
-        info: MessageInfo,
-    ) -> Result<Response, ContractError> {
+    pub fn retrieve_allowance(deps: DepsMut, info: MessageInfo) -> Result<Response, ContractError> {
         let current_state = state.load(deps.storage)?;
         let allowance = match allowances.load(deps.storage, info.clone().sender) {
             Ok(value) => value,
@@ -259,7 +240,6 @@ pub mod execute {
 
     pub fn update_name(
         deps: DepsMut,
-        _env: Env,
         info: MessageInfo,
         name: String,
     ) -> Result<Response, ContractError> {
@@ -276,7 +256,6 @@ pub mod execute {
 
     pub fn update_owner(
         deps: DepsMut,
-        _env: Env,
         info: MessageInfo,
         owner: String,
     ) -> Result<Response, ContractError> {
