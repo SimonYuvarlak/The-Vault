@@ -1,19 +1,20 @@
 use cosmwasm_schema::cw_serde;
 use cosmwasm_schema::QueryResponses;
-use cosmwasm_std::{Coin, Uint128};
-use serde::{Deserialize, Serialize};
+use cosmwasm_std::Uint128;
 
 #[cw_serde]
 pub struct InstantiateMsg {
     pub name: String,
+    pub expected_denom: String,
 }
 
 #[cw_serde]
 pub enum ExecuteMsg {
-    Deposit {
-        coin: Coin,
-    },
+    Deposit {},
     AddDepositAddress {
+        address: String,
+    },
+    RemoveDepositAddress {
         address: String,
     },
     Withdraw {},
@@ -61,6 +62,7 @@ pub struct StateResponse {
     pub owner: String,
     pub name: String,
     pub total_amount: Uint128,
+    pub expected_denom: String,
 }
 
 #[cw_serde]

@@ -1,23 +1,24 @@
+use contract::instantiate_contract;
 use cosmwasm_std::{
-    entry_point, to_json_binary, Binary, Deps, DepsMut, Empty, Env, MessageInfo, Response,
-    StdResult,
+    entry_point, to_json_binary, Binary, Deps, DepsMut, Env, MessageInfo, Response, StdResult,
 };
 use error::ContractError;
-use msg::ExecuteMsg;
+use msg::{ExecuteMsg, InstantiateMsg};
 
 mod contract;
 mod error;
 pub mod msg;
 mod state;
+mod test;
 
 #[entry_point]
 pub fn instantiate(
-    _deps: DepsMut,
+    deps: DepsMut,
     _env: Env,
-    _info: MessageInfo,
-    _msg: Empty,
+    info: MessageInfo,
+    msg: InstantiateMsg,
 ) -> StdResult<Response> {
-    Ok(Response::new())
+    instantiate_contract(deps, info, msg)
 }
 
 #[entry_point]
@@ -28,9 +29,12 @@ pub fn execute(
     msg: ExecuteMsg,
 ) -> Result<Response, ContractError> {
     match msg {
-        ExecuteMsg::Deposit { coin } => contract::execute::deposit_token(deps, info, coin),
+        ExecuteMsg::Deposit {} => contract::execute::deposit_token(deps, info),
         ExecuteMsg::AddDepositAddress { address } => {
             contract::execute::add_deposit_address(deps, info, address)
+        }
+        ExecuteMsg::RemoveDepositAddress { address } => {
+            contract::execute::remove_deposit_address(deps, info, address)
         }
         ExecuteMsg::Withdraw {} => contract::execute::withdraw(deps, env, info),
         ExecuteMsg::AddAllowance { spender, amount } => {

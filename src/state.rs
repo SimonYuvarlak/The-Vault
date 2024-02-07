@@ -10,6 +10,6 @@ pub struct State {
     pub expected_denom: String,
 }
 
-pub const deposit_addresses: Map<Addr, Uint128> = Map::new("deposit_addresses");
-pub const allowances: Map<Addr, Uint128> = Map::new("allowances");
-pub const state: Item<State> = Item::new("state");
+pub const DEPOSIT_ADDRESSES: Map<Addr, Uint128> = Map::new("deposit_addresses");
+pub const ALLOWANCES: Map<Addr, Uint128> = Map::new("allowances");
+pub const STATE: Item<State> = Item::new("state");
