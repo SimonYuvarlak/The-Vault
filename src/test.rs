@@ -48,7 +48,7 @@ fn multitest_vault_contract() {
 
     // Execute - Add deposit address
     app.execute_contract(
-        sender.clone(),
+        owner.clone(),
         contract_addr.clone(),
         &ExecuteMsg::AddDepositAddress {
             address: "sender".to_string(),
@@ -89,7 +89,7 @@ fn multitest_vault_contract() {
 
     // Execute - Remove deposit address
     app.execute_contract(
-        sender.clone(),
+        owner.clone(),
         contract_addr.clone(),
         &ExecuteMsg::RemoveDepositAddress {
             address: "sender".to_string(),

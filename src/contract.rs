@@ -24,7 +24,7 @@ pub mod execute {
     use cosmwasm_std::{BankMsg, Coin, DepsMut, Env, MessageInfo, Response, Uint128};
 
     pub fn deposit_token(deps: DepsMut, info: MessageInfo) -> Result<Response, ContractError> {
-        let current_state = STATE.load(deps.storage)?;
+        let mut current_state = STATE.load(deps.storage)?;
         let mut current_coin = Coin {
             denom: "".to_string(),
             amount: Uint128::zero(),
@@ -47,7 +47,7 @@ pub mod execute {
                         address.clone(),
                         &value.checked_add(current_coin.amount).unwrap_or(value),
                     )?;
-                    current_state
+                    current_state.total_amount = current_state
                         .total_amount
                         .checked_add(current_coin.amount)
                         .unwrap_or(current_state.total_amount);
