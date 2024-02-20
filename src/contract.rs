@@ -305,8 +305,15 @@ pub mod execute {
                 owner: current_state.owner.to_string(),
             });
         }
-        current_state.owner = deps.api.addr_validate(owner.as_str())?;
+
+        let new_owner = deps.api.addr_validate(owner.as_str())?;
+
+        DEPOSIT_ADDRESSES.remove(deps.storage, current_state.owner);
+        DEPOSIT_ADDRESSES.save(deps.storage, new_owner.clone(), &Uint128::zero())?;
+
+        current_state.owner = new_owner;
         STATE.save(deps.storage, &current_state)?;
+
         Ok(Response::new()
             .add_attribute("action", "update_owner")
             .add_attribute("owner", owner))

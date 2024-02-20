@@ -1,8 +1,8 @@
 #[cfg(test)]
 use crate::contract::{execute, instantiate_contract, query};
 use crate::msg::{
-    AllowanceResponse, AllowancesResponse, DepositAddressesResponse, ExecuteMsg, InstantiateMsg,
-    QueryMsg, StateResponse,
+    AllowanceResponse, AllowancesResponse, CanDepositResponse, DepositAddressesResponse,
+    ExecuteMsg, InstantiateMsg, QueryMsg, StateResponse,
 };
 use crate::{execute, instantiate, query};
 use cosmwasm_std::{
@@ -312,21 +312,66 @@ fn multitest_vault_contract() {
     assert_eq!(resp.total_amount, Uint128::zero(),);
 
     // Update Name
+    app.execute_contract(
+        owner.clone(),
+        contract_addr.clone(),
+        &ExecuteMsg::UpdateName {
+            name: "Vault Y".to_string(),
+        },
+        &[],
+    )
+    .unwrap();
+
+    // Query - Get State
+    let resp: StateResponse = app
+        .wrap()
+        .query_wasm_smart(contract_addr.clone(), &QueryMsg::GetState {})
+        .unwrap();
+
+    assert_eq!(resp.name, "Vault Y".to_string(),);
 
     // Update Owner
-}
+    app.execute_contract(
+        owner.clone(),
+        contract_addr.clone(),
+        &ExecuteMsg::UpdateOwner {
+            owner: "new_owner".to_string(),
+        },
+        &[],
+    )
+    .unwrap();
 
-// #[cw_serde]
-// #[derive(QueryResponses)]
-// pub enum QueryMsg {
-//     #[returns(StateResponse)]
-//     GetState {},
-//     #[returns(AllowanceResponse)]
-//     GetAllowance { spender: String },
-//     #[returns(AllowancesResponse)]
-//     GetAllowances {},
-//     #[returns(CanDepositResponse)]
-//     CanDeposit { address: String },
-//     #[returns(DepositAddressesResponse)]
-//     GetDepositAddresses {},
-// }
+    // Query - Get State
+    let resp: StateResponse = app
+        .wrap()
+        .query_wasm_smart(contract_addr.clone(), &QueryMsg::GetState {})
+        .unwrap();
+
+    assert_eq!(resp.owner, "new_owner".to_string(),);
+
+    // Query Deposit Addresses
+    let resp: DepositAddressesResponse = app
+        .wrap()
+        .query_wasm_smart(contract_addr.clone(), &QueryMsg::GetDepositAddresses {})
+        .unwrap();
+
+    assert_eq!(
+        resp,
+        DepositAddressesResponse {
+            addresses: vec!["new_owner".to_string()]
+        },
+    );
+
+    // Query Can Deposit
+    let resp: CanDepositResponse = app
+        .wrap()
+        .query_wasm_smart(
+            contract_addr.clone(),
+            &QueryMsg::CanDeposit {
+                address: "new_owner".to_string(),
+            },
+        )
+        .unwrap();
+
+    assert_eq!(resp, CanDepositResponse { can_deposit: true },);
+}
