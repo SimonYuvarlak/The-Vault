@@ -1,5 +1,5 @@
 use crate::msg::InstantiateMsg;
-use crate::state::{State, STATE};
+use crate::state::{State, DEPOSIT_ADDRESSES, STATE};
 use cosmwasm_std::{DepsMut, MessageInfo, Response, StdResult, Uint128};
 
 pub fn instantiate_contract(
@@ -8,12 +8,13 @@ pub fn instantiate_contract(
     msg: InstantiateMsg,
 ) -> StdResult<Response> {
     let initial_state = State {
-        owner: info.sender,
+        owner: info.clone().sender,
         name: msg.name,
         total_amount: Uint128::zero(),
         expected_denom: msg.expected_denom,
     };
     STATE.save(deps.storage, &initial_state)?;
+    DEPOSIT_ADDRESSES.save(deps.storage, info.sender, &Uint128::zero())?;
     Ok(Response::new().add_attribute("action", "instantiate"))
 }
 
@@ -246,7 +247,7 @@ pub mod execute {
     }
 
     pub fn retrieve_allowance(deps: DepsMut, info: MessageInfo) -> Result<Response, ContractError> {
-        let current_state = STATE.load(deps.storage)?;
+        let mut current_state = STATE.load(deps.storage)?;
         let allowance = match ALLOWANCES.load(deps.storage, info.clone().sender) {
             Ok(value) => value,
             Err(_) => {
@@ -255,6 +256,13 @@ pub mod execute {
                 })
             }
         };
+
+        current_state.total_amount = current_state
+            .total_amount
+            .checked_sub(allowance)
+            .unwrap_or(current_state.total_amount);
+
+        STATE.save(deps.storage, &current_state)?;
 
         let bank_msg = BankMsg::Send {
             to_address: info.clone().sender.to_string(),
@@ -345,7 +353,7 @@ pub mod query {
             .collect::<StdResult<Vec<Uint128>>>()?;
         Ok(AllowancesResponse {
             spenders: spenders.iter().map(|x| x.to_string()).collect(),
-            amounts: amounts,
+            amounts,
         })
     }
 
