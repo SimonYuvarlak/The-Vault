@@ -31,6 +31,11 @@ Some projects can fill the pool while other addresses claim and get their tokens
 
   ### Creationg Web Assembly Code
 
+  Because of a compatibility issue between cosmwasm-std: 1.5.3 and cw-multi-test: 0.20.0, they will not work when they are together.
+  So before creating the wasm file, delete the comment out the import line in the lib.rs `mod test` is the line that needs to be commented out.
+  After the lib.rs file, also comment out the line in the `cargo.toml` -> `#cw-multi-test = "0.20.0"`
+  Finally, rebuild the project with `cargo build`.
+
   To create a  `wasm` file, you can type `cargo wasm`.
   After creating the wasm file, you can check if the Rust code you have is a valid cosmwasm code, by typing `cosmwasm-check ./target/wasm32-unknown-unknwon/release/the_vault.wasm`.
   
